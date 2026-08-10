@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InvestHeights — Your Financial Journey</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#F4C430;--gold-light:#FFE066;--gold-dark:#B8860B;--green:#00C896;--red:#FF4757;--blue:#6496FF;--dark:#0A0A0F;--dark2:#12121A;--dark3:#1E1E2E;--white:#F5F5F0;--muted:#8888AA;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--dark);color:var(--white);overflow-x:hidden;}
+.page{display:none;min-height:100vh;position:relative;}
+.page.active{display:flex;flex-direction:column;}
+.progress-bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--green));z-index:9999;transition:width .6s ease;}
+#star-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;}
+
+/* PAGE 1 */
+#page-lang{align-items:center;justify-content:center;background:var(--dark);}
+.lang-wrap{text-align:center;z-index:10;position:relative;padding:2rem;}
+.lang-title{font-family:'Playfair Display',serif;font-size:clamp(2rem,5vw,3.2rem);color:var(--gold);margin-bottom:.4rem;animation:fadeDown .8s ease both;}
+.lang-sub{color:var(--muted);margin-bottom:2.5rem;animation:fadeDown .8s .2s ease both;}
+.lang-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.9rem;max-width:580px;animation:fadeUp .8s .4s ease both;}
+.lang-btn{background:var(--dark3);border:1px solid #333;color:var(--white);padding:.9rem 1.2rem;border-radius:14px;cursor:pointer;font-size:.9rem;font-family:'DM Sans',sans-serif;transition:all .3s;}
+.lang-btn:hover,.lang-btn.sel{border-color:var(--gold);color:var(--gold);background:rgba(244,196,48,.08);transform:translateY(-2px);}
+.lang-flag{font-size:1.4rem;display:block;margin-bottom:.25rem;}
+.lang-confirm{margin-top:2rem;padding:1rem 3rem;background:var(--gold);color:var(--dark);border:none;border-radius:50px;font-size:1rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .3s;animation:fadeUp .8s .6s ease both;}
+.lang-confirm:hover{background:var(--gold-light);transform:scale(1.05);}
+
+/* PAGE 2 */
+#page-intro{background:var(--dark);overflow:hidden;}
+#bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;}
+.intro-content{position:relative;z-index:10;max-width:900px;margin:0 auto;padding:4rem 2rem 3rem;flex:1;}
+.typing-block{margin-bottom:2rem;background:rgba(10,10,15,.88);backdrop-filter:blur(12px);border:1px solid rgba(244,196,48,.2);border-radius:20px;padding:2.5rem;}
+.typing-label{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--gold);text-transform:uppercase;letter-spacing:.2em;margin-bottom:1rem;}
+#typing-text{font-family:'Playfair Display',serif;font-size:clamp(1.15rem,2.8vw,1.7rem);line-height:1.65;min-height:3em;}
+.cursor{display:inline-block;width:3px;height:1.1em;background:var(--gold);margin-left:2px;vertical-align:middle;animation:blink .7s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.info-blocks{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin-bottom:2rem;}
+.info-block{background:rgba(10,10,15,.88);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.07);border-radius:20px;padding:1.8rem;opacity:0;transform:translateY(28px);transition:all .6s ease;}
+.info-block.vis{opacity:1;transform:translateY(0);}
+.info-block:hover{border-color:rgba(244,196,48,.25);transform:translateY(-4px);}
+.block-icon{font-size:1.9rem;margin-bottom:.7rem;}
+.block-title{font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--gold);margin-bottom:.6rem;}
+.block-body{color:var(--muted);font-size:.88rem;line-height:1.65;}
+.invest-block{grid-column:1/-1;background:rgba(10,10,15,.88);backdrop-filter:blur(12px);border:1px solid rgba(244,196,48,.18);border-radius:20px;padding:2rem;opacity:0;transform:translateY(28px);transition:all .6s .3s ease;}
+.invest-block.vis{opacity:1;transform:translateY(0);}
+.invest-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:.9rem;margin-top:1.1rem;}
+.invest-pill{text-align:center;padding:.75rem .4rem;background:rgba(244,196,48,.07);border:1px solid rgba(244,196,48,.18);border-radius:12px;font-size:.78rem;transition:all .3s;}
+.invest-pill:hover{background:rgba(244,196,48,.18);border-color:var(--gold);transform:scale(1.06);}
+.pill-icon{font-size:1.4rem;display:block;margin-bottom:.25rem;}
+.enter-wrap{text-align:center;margin:2rem 0 3rem;opacity:0;transition:opacity .8s;}
+.enter-wrap.vis{opacity:1;}
+.enter-btn{display:inline-flex;align-items:center;gap:.8rem;padding:1.15rem 3rem;background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:var(--dark);border:none;border-radius:50px;font-size:1.05rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .3s;animation:pulse-glow 2s infinite;}
+@keyframes pulse-glow{0%,100%{box-shadow:0 0 20px rgba(244,196,48,.3)}50%{box-shadow:0 0 50px rgba(244,196,48,.65)}}
+.enter-btn:hover{transform:scale(1.05);background:var(--gold-light);}
+
+/* PAGE 3 */
+#page-goals{background:linear-gradient(135deg,#0d1117 0%,#1a1a2e 50%,#0d1117 100%);align-items:center;justify-content:center;overflow:hidden;}
+.scene-el{position:absolute;font-size:4rem;opacity:.055;animation:float-scene 6s ease-in-out infinite;pointer-events:none;user-select:none;}
+@keyframes float-scene{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-18px) rotate(5deg)}}
+.goals-card{background:rgba(255,255,255,.03);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:3rem;max-width:540px;width:90%;text-align:center;position:relative;z-index:10;animation:fadeUp .8s ease forwards;}
+.goals-q{font-family:'Playfair Display',serif;font-size:clamp(1.3rem,3vw,2rem);margin-bottom:.5rem;}
+.goals-sub{color:var(--muted);font-size:.88rem;margin-bottom:1.8rem;}
+.goals-input{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.13);border-radius:12px;padding:1rem 1.4rem;color:var(--white);font-size:.95rem;font-family:'DM Sans',sans-serif;resize:vertical;min-height:100px;outline:none;transition:border-color .3s;}
+.goals-input:focus{border-color:var(--gold);}
+
+/* PAGE 4 */
+#page-profile{background:linear-gradient(135deg,#0a0a0f 0%,#1a1025 100%);align-items:center;justify-content:center;}
+.profile-card{background:rgba(255,255,255,.03);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:2.8rem;max-width:580px;width:90%;z-index:10;animation:fadeUp .6s ease forwards;}
+.profile-title{font-family:'Playfair Display',serif;font-size:1.75rem;color:var(--gold);margin-bottom:.4rem;}
+.profile-sub{color:var(--muted);font-size:.88rem;margin-bottom:1.8rem;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem;margin-bottom:1.4rem;}
+.form-group{display:flex;flex-direction:column;gap:.35rem;}
+.form-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+.form-input{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.11);border-radius:10px;padding:.78rem 1rem;color:var(--white);font-size:.93rem;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .3s;}
+.form-input:focus{border-color:var(--gold);}
+.form-input::placeholder{color:rgba(136,136,170,.45);}
+.next-btn{padding:1rem 2.5rem;background:var(--gold);color:var(--dark);border:none;border-radius:50px;font-size:1rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .3s;margin-top:.8rem;}
+.next-btn:hover{background:var(--gold-light);transform:scale(1.03);}
+
+/* PAGE 5 */
+#page-invest{background:var(--dark);padding:2rem;}
+.invest-header{text-align:center;padding:2rem 0 2.5rem;}
+.invest-header h1{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,4vw,2.8rem);color:var(--gold);margin-bottom:.4rem;}
+.invest-header p{color:var(--muted);}
+.cats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.4rem;max-width:860px;margin:0 auto;}
+.cat-card{background:var(--dark3);border:1px solid rgba(255,255,255,.06);border-radius:20px;padding:2rem;cursor:pointer;transition:all .4s;position:relative;overflow:hidden;}
+.cat-card::before{content:'';position:absolute;inset:0;opacity:0;border-radius:20px;transition:opacity .4s;}
+.cat-card.a::before{background:linear-gradient(135deg,rgba(0,200,150,.1),transparent);}
+.cat-card.b::before{background:linear-gradient(135deg,rgba(244,196,48,.1),transparent);}
+.cat-card.c::before{background:linear-gradient(135deg,rgba(255,71,87,.1),transparent);}
+.cat-card.d::before{background:linear-gradient(135deg,rgba(100,150,255,.1),transparent);}
+.cat-card:hover::before{opacity:1;}
+.cat-card:hover{transform:translateY(-6px);border-color:rgba(255,255,255,.14);}
+.cat-letter{font-family:'Playfair Display',serif;font-size:3rem;font-weight:900;opacity:.13;position:absolute;top:1rem;right:1.4rem;transition:opacity .3s;}
+.cat-card:hover .cat-letter{opacity:.28;}
+.cat-icon{font-size:2.3rem;margin-bottom:.7rem;}
+.cat-name{font-family:'Playfair Display',serif;font-size:1.22rem;margin-bottom:.45rem;}
+.cat-card.a{border-left:3px solid var(--green);}.cat-card.a .cat-name{color:var(--green);}
+.cat-card.b{border-left:3px solid var(--gold);}.cat-card.b .cat-name{color:var(--gold);}
+.cat-card.c{border-left:3px solid var(--red);}.cat-card.c .cat-name{color:var(--red);}
+.cat-card.d{border-left:3px solid var(--blue);}.cat-card.d .cat-name{color:var(--blue);}
+.cat-preview{color:var(--muted);font-size:.82rem;line-height:1.55;}
+.to-advisor-btn{display:block;margin:2.5rem auto 0;padding:1rem 2.5rem;background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:var(--dark);border:none;border-radius:50px;font-size:1rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .3s;box-shadow:0 0 25px rgba(244,196,48,.25);}
+.to-advisor-btn:hover{transform:scale(1.05);background:var(--gold-light);}
+
+/* PAGE 6 — SAFE AMOUNT + CHATBOT */
+#page-advisor{background:radial-gradient(ellipse at 20% 20%,#0f1a0f 0%,#0a0a0f 60%,#0f0a1a 100%);padding:2rem;min-height:100vh;display:none;flex-direction:column;}
+#page-advisor.active{display:flex;}
+
+.advisor-hero{text-align:center;padding:3rem 1rem 2rem;max-width:800px;margin:0 auto;}
+.advisor-eyebrow{font-family:'JetBrains Mono',monospace;font-size:.72rem;text-transform:uppercase;letter-spacing:.2em;color:var(--green);margin-bottom:1rem;}
+
+.safe-amount-card{background:rgba(0,200,150,.06);border:1px solid rgba(0,200,150,.25);border-radius:24px;padding:2.5rem 2rem;margin:0 auto 2.5rem;max-width:680px;width:95%;text-align:center;position:relative;overflow:hidden;}
+.safe-amount-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(0,200,150,.08),transparent 70%);pointer-events:none;}
+.safe-tag{font-family:'JetBrains Mono',monospace;font-size:.7rem;text-transform:uppercase;letter-spacing:.18em;color:var(--green);margin-bottom:.8rem;display:block;}
+.safe-heading{font-family:'Playfair Display',serif;font-size:clamp(1.1rem,3vw,1.6rem);color:var(--white);line-height:1.5;margin-bottom:1.6rem;}
+.safe-heading span{color:var(--green);}
+.safe-formula{display:inline-flex;align-items:center;gap:.7rem;background:rgba(0,200,150,.1);border:1px solid rgba(0,200,150,.3);border-radius:14px;padding:.9rem 1.8rem;margin-bottom:1.6rem;font-family:'JetBrains Mono',monospace;font-size:1rem;color:var(--green);}
+.safe-amount-display{background:var(--dark3);border-radius:16px;padding:1.4rem 2rem;display:inline-block;min-width:260px;}
+.sad-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;text-transform:uppercase;letter-spacing:.15em;color:var(--muted);margin-bottom:.4rem;}
+.sad-value{font-family:'Playfair Display',serif;font-size:2.4rem;color:var(--green);letter-spacing:-.02em;}
+.sad-month{font-size:.85rem;color:var(--muted);margin-top:.2rem;}
+
+.breakdown-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;max-width:680px;margin:0 auto 2.5rem;width:95%;}
+.breakdown-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:1.2rem;text-align:center;transition:all .3s;}
+.breakdown-card:hover{border-color:rgba(244,196,48,.2);transform:translateY(-3px);}
+.bc-icon{font-size:1.6rem;margin-bottom:.5rem;}
+.bc-label{font-size:.75rem;color:var(--muted);margin-bottom:.3rem;}
+.bc-val{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--gold);}
+
+/* ── CHATBOT ── */
+.chatbot-section{max-width:760px;margin:0 auto;width:95%;padding-bottom:3rem;}
+.chatbot-heading{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--white);margin-bottom:.3rem;display:flex;align-items:center;gap:.6rem;}
+.chatbot-sub{color:var(--muted);font-size:.88rem;margin-bottom:1.2rem;}
+.chatbot-box{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.09);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;}
+.chat-messages{height:360px;overflow-y:auto;padding:1.5rem;display:flex;flex-direction:column;gap:1rem;scroll-behavior:smooth;}
+.chat-messages::-webkit-scrollbar{width:4px;}
+.chat-messages::-webkit-scrollbar-track{background:transparent;}
+.chat-messages::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:4px;}
+.msg{display:flex;gap:.8rem;max-width:88%;}
+.msg.user{align-self:flex-end;flex-direction:row-reverse;}
+.msg-avatar{width:32px;height:32px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.9rem;}
+.msg.bot .msg-avatar{background:linear-gradient(135deg,var(--gold),var(--gold-dark));}
+.msg.user .msg-avatar{background:linear-gradient(135deg,var(--green),#006650);}
+.msg-bubble{padding:.75rem 1.1rem;border-radius:16px;font-size:.9rem;line-height:1.6;}
+.msg.bot .msg-bubble{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);color:var(--white);border-bottom-left-radius:4px;}
+.msg.user .msg-bubble{background:rgba(0,200,150,.12);border:1px solid rgba(0,200,150,.2);color:var(--white);border-bottom-right-radius:4px;}
+.msg-bubble.typing{display:flex;align-items:center;gap:.4rem;padding:.9rem 1.1rem;}
+.dot{width:7px;height:7px;background:var(--muted);border-radius:50%;animation:dotbounce 1.2s infinite;}
+.dot:nth-child(2){animation-delay:.2s;}
+.dot:nth-child(3){animation-delay:.4s;}
+@keyframes dotbounce{0%,80%,100%{transform:scale(.8);opacity:.5}40%{transform:scale(1.2);opacity:1}}
+
+.chat-suggestions{display:flex;gap:.6rem;flex-wrap:wrap;padding:.9rem 1.2rem;border-top:1px solid rgba(255,255,255,.06);}
+.chip{background:rgba(244,196,48,.08);border:1px solid rgba(244,196,48,.2);color:var(--gold);padding:.4rem .9rem;border-radius:50px;font-size:.8rem;cursor:pointer;transition:all .25s;white-space:nowrap;}
+.chip:hover{background:rgba(244,196,48,.18);transform:scale(1.03);}
+
+.chat-input-row{display:flex;gap:.6rem;padding:1rem 1.2rem;border-top:1px solid rgba(255,255,255,.06);}
+.chat-input{flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:.75rem 1rem;color:var(--white);font-size:.9rem;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .3s;}
+.chat-input:focus{border-color:var(--gold);}
+.chat-input::placeholder{color:rgba(136,136,170,.45);}
+.send-btn{background:var(--gold);color:var(--dark);border:none;border-radius:12px;width:42px;height:42px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;transition:all .25s;}
+.send-btn:hover{background:var(--gold-light);transform:scale(1.05);}
+.send-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+
+/* MODALS */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);backdrop-filter:blur(8px);z-index:1000;align-items:center;justify-content:center;}
+.overlay.open{display:flex;animation:fadeIn .3s ease;}
+.modal-box{background:var(--dark3);border:1px solid rgba(255,255,255,.11);border-radius:24px;padding:2.4rem;max-width:500px;width:92%;position:relative;animation:scaleIn .4s cubic-bezier(.34,1.56,.64,1);max-height:90vh;overflow-y:auto;}
+.m-close{position:absolute;top:1rem;right:1rem;background:rgba(255,255,255,.06);border:none;color:var(--white);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:background .2s;}
+.m-close:hover{background:rgba(255,71,87,.35);}
+.m-title{font-family:'Playfair Display',serif;font-size:1.55rem;margin-bottom:1.4rem;}
+.m-list{list-style:none;display:flex;flex-direction:column;gap:.75rem;}
+.m-list li{display:flex;align-items:center;gap:1rem;padding:.88rem 1.15rem;background:rgba(255,255,255,.03);border-radius:12px;border:1px solid rgba(255,255,255,.06);cursor:pointer;font-size:.93rem;transition:all .25s;}
+.m-list li:hover{background:rgba(255,255,255,.08);transform:translateX(6px);}
+.num{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted);min-width:18px;}
+
+#detail-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);backdrop-filter:blur(12px);z-index:2000;align-items:center;justify-content:center;}
+#detail-overlay.open{display:flex;animation:fadeIn .25s ease;}
+.detail-box{background:var(--dark3);border-radius:24px;padding:2.5rem;max-width:580px;width:93%;position:relative;animation:scaleIn .38s cubic-bezier(.34,1.56,.64,1);max-height:90vh;overflow-y:auto;border:1px solid rgba(255,255,255,.1);}
+.d-close{position:absolute;top:1rem;right:1rem;background:rgba(255,255,255,.06);border:none;color:var(--white);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:background .2s;z-index:10;}
+.d-close:hover{background:rgba(255,71,87,.35);}
+.d-badge{display:inline-block;font-size:.7rem;font-family:'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;padding:.3rem .8rem;border-radius:50px;margin-bottom:1rem;}
+.d-name{font-family:'Playfair Display',serif;font-size:1.7rem;margin-bottom:.5rem;}
+.d-tagline{color:var(--muted);font-size:.9rem;margin-bottom:1.8rem;line-height:1.55;}
+.d-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.9rem;margin-bottom:1.4rem;}
+.d-stat{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:1rem;text-align:center;}
+.d-stat-label{font-size:.65rem;font-family:'JetBrains Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.4rem;}
+.d-stat-val{font-family:'Playfair Display',serif;font-size:1rem;line-height:1.3;}
+.d-section{margin-bottom:1.4rem;}
+.d-section-title{font-size:.68rem;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.15em;color:var(--muted);margin-bottom:.7rem;padding-bottom:.4rem;border-bottom:1px solid rgba(255,255,255,.06);}
+.d-desc{font-size:.9rem;line-height:1.72;color:rgba(245,245,240,.85);}
+.risk-bar-wrap{height:8px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden;}
+.risk-bar{height:100%;border-radius:4px;width:0%;transition:width 1s ease;}
+.pros-cons{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.4rem;}
+.pros,.cons{background:rgba(255,255,255,.03);border-radius:14px;padding:1rem;}
+.pros{border-top:2px solid var(--green);}
+.cons{border-top:2px solid var(--red);}
+.pc-title{font-size:.68rem;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.12em;margin-bottom:.7rem;}
+.pros .pc-title{color:var(--green);}.cons .pc-title{color:var(--red);}
+.pc-list{list-style:none;font-size:.82rem;color:rgba(245,245,240,.75);display:flex;flex-direction:column;gap:.45rem;}
+.pc-list li{padding-left:1rem;position:relative;}
+.pc-list li::before{content:'•';position:absolute;left:0;opacity:.5;}
+.how-steps{list-style:none;counter-reset:steps;display:flex;flex-direction:column;gap:.65rem;}
+.how-steps li{counter-increment:steps;display:flex;align-items:flex-start;gap:.9rem;font-size:.87rem;color:rgba(245,245,240,.8);line-height:1.55;}
+.how-steps li::before{content:counter(steps);min-width:24px;height:24px;background:rgba(244,196,48,.15);color:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-family:'JetBrains Mono',monospace;flex-shrink:0;margin-top:1px;}
+
+/* inline mini chatbot inside detail modal */
+.mini-chat-section{margin-top:1.6rem;border-top:1px solid rgba(255,255,255,.07);padding-top:1.4rem;}
+.mini-chat-label{font-size:.68rem;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.15em;color:var(--gold);margin-bottom:.9rem;display:flex;align-items:center;gap:.5rem;}
+.mini-chat-label::after{content:'';flex:1;height:1px;background:rgba(244,196,48,.15);}
+.mini-msgs{height:180px;overflow-y:auto;display:flex;flex-direction:column;gap:.8rem;margin-bottom:.8rem;padding:.5rem 0;scroll-behavior:smooth;}
+.mini-msgs::-webkit-scrollbar{width:3px;}
+.mini-msgs::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:3px;}
+.mini-chip-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.8rem;}
+.mini-input-row{display:flex;gap:.5rem;}
+.mini-input{flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:.6rem .9rem;color:var(--white);font-size:.85rem;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .3s;}
+.mini-input:focus{border-color:var(--gold);}
+.mini-input::placeholder{color:rgba(136,136,170,.4);}
+.mini-send{background:var(--gold);color:var(--dark);border:none;border-radius:10px;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;transition:all .2s;}
+.mini-send:hover{background:var(--gold-light);}
+.mini-send:disabled{opacity:.45;cursor:not-allowed;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes scaleIn{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
+
+@media(max-width:600px){
+  .info-blocks,.cats-grid{grid-template-columns:1fr;}
+  .invest-grid{grid-template-columns:repeat(3,1fr);}
+  .lang-grid{grid-template-columns:repeat(2,1fr);}
+  .form-grid{grid-template-columns:1fr;}
+  .d-grid,.breakdown-grid{grid-template-columns:1fr 1fr;}
+  .pros-cons{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+<div class="progress-bar" id="prog" style="width:0%"></div>
+<canvas id="star-canvas"></canvas>
+
+<!-- PAGE 1 — LANGUAGE -->
+<div class="page active" id="page-lang">
+  <div class="lang-wrap">
+    <div class="lang-title">🌐 InvestHeights</div>
+    <div class="lang-sub">Select your language to begin your journey</div>
+    <div class="lang-grid">
+      <button class="lang-btn sel" onclick="pickLang(this)"><span class="lang-flag">🇺🇸</span>English</button>
+      <button class="lang-btn" onclick="pickLang(this)"><span class="lang-flag">🇮🇳</span>हिन्दी</button>
+      <button class="lang-btn" onclick="pickLang(this)"><span class="lang-flag">🇮🇳</span>தமிழ்</button>
+      <button class="lang-btn" onclick="pickLang(this)"><span class="lang-flag">🇮🇳</span>తెలుగు</button>
+      <button class="lang-btn" onclick="pickLang(this)"><span class="lang-flag">🇫🇷</span>Français</button>
+      <button class="lang-btn" onclick="pickLang(this)"><span class="lang-flag">🇪🇸</span>Español</button>
+    </div>
+    <button class="lang-confirm" onclick="go('page-intro')">Continue →</button>
+  </div>
+</div>
+
+<!-- PAGE 2 — INTRO -->
+<div class="page" id="page-intro">
+  <canvas id="bg-canvas"></canvas>
+  <div class="intro-content">
+    <div class="typing-block">
+      <div class="typing-label">// What is investing?</div>
+      <div id="typing-text"><span class="cursor"></span></div>
+    </div>
+    <div class="info-blocks">
+      <div class="info-block" id="blk-why">
+        <div class="block-icon">🎯</div>
+        <div class="block-title">Why Start Investing?</div>
+        <div class="block-body">Achieve financial goals — buying a home, funding education, or building retirement wealth. Investing puts your money to work, growing silently while you live your life. Even ₹500/month invested consistently can become lakhs over decades.</div>
+      </div>
+      <div class="info-block" id="blk-pow">
+        <div class="block-icon">📈</div>
+        <div class="block-title">The Power of Compounding</div>
+        <div class="block-body">Albert Einstein called it the "eighth wonder of the world." ₹1,00,000 invested at 12% p.a. becomes ₹9,64,629 in 20 years — without adding a single rupee more. Time is your greatest ally in wealth creation.</div>
+      </div>
+      <div class="invest-block" id="blk-ways">
+        <div class="block-title" style="font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--gold)">💼 Different Ways to Invest</div>
+        <div class="invest-grid">
+          <div class="invest-pill"><span class="pill-icon">🏦</span>Fixed Deposit</div>
+          <div class="invest-pill"><span class="pill-icon">🥇</span>Gold</div>
+          <div class="invest-pill"><span class="pill-icon">🏠</span>Real Estate</div>
+          <div class="invest-pill"><span class="pill-icon">📊</span>Stocks</div>
+          <div class="invest-pill"><span class="pill-icon">₿</span>Crypto</div>
+          <div class="invest-pill"><span class="pill-icon">🎨</span>Alt Assets</div>
+        </div>
+      </div>
+    </div>
+    <div class="enter-wrap" id="enter-wrap">
+      <button class="enter-btn" onclick="go('page-goals')">🚀 Begin Your Investment Journey</button>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 3 — GOALS -->
+<div class="page" id="page-goals">
+  <div class="scene-el" style="top:5%;left:5%">🏠</div>
+  <div class="scene-el" style="top:10%;right:8%;animation-delay:1s">🚗</div>
+  <div class="scene-el" style="bottom:20%;left:10%;animation-delay:2s">🏫</div>
+  <div class="scene-el" style="bottom:15%;right:12%;animation-delay:.5s">🎓</div>
+  <div class="scene-el" style="top:45%;left:2%;animation-delay:1.5s">✈️</div>
+  <div class="scene-el" style="top:50%;right:3%;animation-delay:2.5s">💒</div>
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;position:relative;z-index:10;">
+    <div class="goals-card">
+      <div class="goals-q">What are your financial goals?</div>
+      <div class="goals-sub">Tell us what you're working towards — we'll personalise your journey</div>
+      <textarea class="goals-input" id="goals-inp" placeholder="e.g. Buy a home in 5 years, retire by 50, fund my child's education..."></textarea>
+      <button class="next-btn" style="margin-top:1.4rem;width:100%;" onclick="go('page-profile')">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 4 — PROFILE -->
+<div class="page" id="page-profile">
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:2rem;">
+    <div class="profile-card">
+      <div class="profile-title">Your Profile</div>
+      <div class="profile-sub">Help us understand your financial situation</div>
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Age</label><input class="form-input" type="number" placeholder="25" id="f-age" min="18" max="80"></div>
+        <div class="form-group"><label class="form-label">Occupation</label><input class="form-input" type="text" placeholder="Software Engineer" id="f-occ"></div>
+        <div class="form-group"><label class="form-label">City</label><input class="form-input" type="text" placeholder="Mumbai" id="f-city"></div>
+        <div class="form-group"><label class="form-label">Monthly Income (₹)</label><input class="form-input" type="number" placeholder="50000" id="f-inc"></div>
+        <div class="form-group"><label class="form-label">Monthly Expenses (₹)</label><input class="form-input" type="number" placeholder="30000" id="f-exp"></div>
+        <div class="form-group"><label class="form-label">Monthly Savings (₹)</label><input class="form-input" type="number" placeholder="20000" id="f-sav"></div>
+      </div>
+      <button class="next-btn" style="width:100%;" onclick="saveProfile()">Save &amp; Continue →</button>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 5 — CATEGORIES -->
+<div class="page" id="page-invest">
+  <div class="invest-header">
+    <h1>Choose Your Investment Path</h1>
+    <p>Tap a category, then tap any instrument to learn everything about it</p>
+  </div>
+  <div class="cats-grid">
+    <div class="cat-card a" onclick="openCat('a')">
+      <div class="cat-letter">A</div><div class="cat-icon">🏦</div>
+      <div class="cat-name">Bank Related Investment</div>
+      <div class="cat-preview">Fixed Deposits · Recurring Deposits</div>
+    </div>
+    <div class="cat-card b" onclick="openCat('b')">
+      <div class="cat-letter">B</div><div class="cat-icon">📊</div>
+      <div class="cat-name">Share Market Investment</div>
+      <div class="cat-preview">Mutual Funds · Index Fund · Stocks · ETF · Intraday</div>
+    </div>
+    <div class="cat-card c" onclick="openCat('c')">
+      <div class="cat-letter">C</div><div class="cat-icon">₿</div>
+      <div class="cat-name">Crypto Currency</div>
+      <div class="cat-preview">Bitcoin · Venture Capital</div>
+    </div>
+    <div class="cat-card d" onclick="openCat('d')">
+      <div class="cat-letter">D</div><div class="cat-icon">🏠</div>
+      <div class="cat-name">Physical Investment</div>
+      <div class="cat-preview">Real Estate · Gold · Silver · Luxury Assets</div>
+    </div>
+  </div>
+  <button class="to-advisor-btn" onclick="go('page-advisor');buildAdvisor()">
+    💡 Get Your Safe Investment Amount &amp; AI Advisor →
+  </button>
+</div>
+
+<!-- PAGE 6 — SAFE AMOUNT + CHATBOT -->
+<div class="page" id="page-advisor">
+  <div class="advisor-hero">
+    <div class="advisor-eyebrow">// Personalised for you</div>
+    <div class="safe-amount-card">
+      <span class="safe-tag">Your Safe Investment Rule</span>
+      <div class="safe-heading">
+        The <span>safest amount you can invest</span> is your<br>
+        monthly income ÷ 80
+      </div>
+      <div class="safe-formula">Monthly Income &nbsp;÷&nbsp; 80 &nbsp;= &nbsp;Safe Daily Investment</div>
+      <div class="safe-amount-display">
+        <div class="sad-label">Your recommended safe amount</div>
+        <div class="sad-value" id="safe-val">₹625</div>
+        <div class="sad-month" id="safe-desc">per day &nbsp;·&nbsp; ₹18,750 / month</div>
+      </div>
+    </div>
+
+    <div class="breakdown-grid" id="breakdown-grid">
+      <div class="breakdown-card">
+        <div class="bc-icon">💰</div>
+        <div class="bc-label">Monthly Income</div>
+        <div class="bc-val" id="bd-income">₹50,000</div>
+      </div>
+      <div class="breakdown-card">
+        <div class="bc-icon">🛒</div>
+        <div class="bc-label">Monthly Expenses</div>
+        <div class="bc-val" id="bd-expense">₹30,000</div>
+      </div>
+      <div class="breakdown-card">
+        <div class="bc-icon">🏦</div>
+        <div class="bc-label">Safe Daily Invest</div>
+        <div class="bc-val" id="bd-safe">₹625</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Full chatbot -->
+  <div class="chatbot-section">
+    <div class="chatbot-heading">🤖 InvestHeights AI Advisor</div>
+    <div class="chatbot-sub">Ask me anything about investing, your portfolio, or where to start based on your profile.</div>
+    <div class="chatbot-box">
+      <div class="chat-messages" id="chat-msgs"></div>
+      <div class="chat-suggestions">
+        <span class="chip" onclick="chipSend(this)">Where should I start?</span>
+        <span class="chip" onclick="chipSend(this)">Is crypto safe for me?</span>
+        <span class="chip" onclick="chipSend(this)">Best SIP amount for me?</span>
+        <span class="chip" onclick="chipSend(this)">How to beat inflation?</span>
+        <span class="chip" onclick="chipSend(this)">Explain index funds simply</span>
+      </div>
+      <div class="chat-input-row">
+        <input class="chat-input" id="chat-input" placeholder="Ask your investment question..." onkeydown="if(event.key==='Enter')sendChat()">
+        <button class="send-btn" id="send-btn" onclick="sendChat()">➤</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL 1 — Category -->
+<div class="overlay" id="cat-overlay">
+  <div class="modal-box">
+    <button class="m-close" onclick="closeCat()">✕</button>
+    <div class="m-title" id="cat-title"></div>
+    <ul class="m-list" id="cat-list"></ul>
+  </div>
+</div>
+
+<!-- MODAL 2 — Detail (with mini chatbot) -->
+<div class="overlay" id="detail-overlay">
+  <div class="detail-box" id="detail-box"></div>
+</div>
+
+<script>
+// ─── PROFILE STATE ───
+let profile={income:50000,expense:30000,savings:20000,age:25,occ:'',city:'',goals:''};
+
+// ─── STARS ───
+(()=>{
+  const c=document.getElementById('star-canvas'),x=c.getContext('2d');
+  const r=()=>{c.width=innerWidth;c.height=innerHeight;};r();window.addEventListener('resize',r);
+  const s=Array.from({length:220},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.4,sp:Math.random()*.3+.05,op:Math.random()}));
+  (function d(){x.clearRect(0,0,c.width,c.height);s.forEach(p=>{x.beginPath();x.arc(p.x,p.y,p.r,0,Math.PI*2);x.fillStyle=`rgba(244,196,48,${p.op})`;x.fill();p.y-=p.sp;p.op=.3+Math.abs(Math.sin(Date.now()*.001+p.x))*.7;if(p.y<0)p.y=c.height;});requestAnimationFrame(d);})();
+})();
+
+// ─── BG CANVAS ───
+function initBg(){
+  const c=document.getElementById('bg-canvas'),x=c.getContext('2d');
+  const r=()=>{c.width=innerWidth;c.height=innerHeight;};r();window.addEventListener('resize',r);
+  const em=['🪙','🥇','📈','💰','💵','📊','💹','🏦','💎'];
+  const mk=(i)=>{const g=Math.random()<.4;return{x:Math.random()*innerWidth,y:i?Math.random()*innerHeight:-50,e:em[~~(Math.random()*em.length)],sz:18+Math.random()*22,sy:g?1.2+Math.random()*2:-.6-Math.random()*1.4,sx:(Math.random()-.5)*.7,op:.07+Math.random()*.15,ro:Math.random()*Math.PI*2,rs:(Math.random()-.5)*.05};};
+  const ps=Array.from({length:32},()=>mk(true));
+  const cd=[];let lc=200;for(let i=0;i<32;i++){const o=lc,ch=(Math.random()-.45)*28,cl=o+ch;lc=cl;cd.push({o,cl,h:Math.max(o,cl)+Math.random()*13,l:Math.min(o,cl)-Math.random()*13});}
+  (function fr(){x.clearRect(0,0,c.width,c.height);const cw=c.width,ch=c.height,W=cw/cd.length,mn=Math.min(...cd.map(d=>d.l)),mx=Math.max(...cd.map(d=>d.h)),rn=mx-mn||1;
+  const sy=p=>ch*.2+ch*.6-((p-mn)/rn)*ch*.6;
+  x.globalAlpha=.055;cd.forEach((d,i)=>{const xp=i*W+W/2,g=d.cl>=d.o;x.strokeStyle=g?'#00C896':'#FF4757';x.fillStyle=g?'#00C896':'#FF4757';x.lineWidth=1.5;x.beginPath();x.moveTo(xp,sy(d.h));x.lineTo(xp,sy(d.l));x.stroke();const bt=sy(Math.max(d.o,d.cl)),bb=sy(Math.min(d.o,d.cl));x.fillRect(xp-W*.3,bt,W*.6,Math.max(2,bb-bt));});
+  x.globalAlpha=.09;x.strokeStyle='#F4C430';x.lineWidth=2;x.beginPath();cd.forEach((d,i)=>i?x.lineTo(i*W+W/2,sy(d.cl)):x.moveTo(W/2,sy(d.cl)));x.stroke();x.globalAlpha=1;
+  ps.forEach((p,i)=>{x.save();x.globalAlpha=p.op;x.font=`${p.sz}px serif`;x.translate(p.x,p.y);x.rotate(p.ro);x.fillText(p.e,-p.sz/2,p.sz/2);x.restore();p.y+=p.sy;p.x+=p.sx;p.ro+=p.rs;if(p.y>c.height+60||p.y<-80){const n=mk(false);if(p.y<-80)n.y=c.height+50;ps[i]=n;}if(p.x<-50)p.x=c.width+30;if(p.x>c.width+50)p.x=-30;});
+  requestAnimationFrame(fr);})();
+}
+
+// ─── TYPING ───
+const TXT="Investing is putting your money (or time/effort) into an asset or activity with the expectation that it will grow in value or generate income over time.";
+let ti=0,td=false;
+function startTyping(){if(td)return;td=true;const el=document.getElementById('typing-text');
+  (function t(){if(ti<TXT.length){el.innerHTML=TXT.slice(0,++ti)+'<span class="cursor"></span>';setTimeout(t,26);}
+  else{el.innerHTML=TXT+'<span class="cursor"></span>';setTimeout(()=>{document.getElementById('blk-why').classList.add('vis');document.getElementById('blk-pow').classList.add('vis');setTimeout(()=>{document.getElementById('blk-ways').classList.add('vis');setTimeout(()=>document.getElementById('enter-wrap').classList.add('vis'),600);},400);},300);}})();
+}
+
+// ─── NAV ───
+const PM={'page-lang':0,'page-intro':20,'page-goals':50,'page-profile':70,'page-invest':88,'page-advisor':100};
+function go(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');document.getElementById('prog').style.width=(PM[id]||0)+'%';if(id==='page-intro'){initBg();setTimeout(startTyping,400);}}
+function pickLang(b){document.querySelectorAll('.lang-btn').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');}
+function saveProfile(){
+  profile.income=parseInt(document.getElementById('f-inc').value)||50000;
+  profile.expense=parseInt(document.getElementById('f-exp').value)||30000;
+  profile.savings=parseInt(document.getElementById('f-sav').value)||20000;
+  profile.age=parseInt(document.getElementById('f-age').value)||25;
+  profile.occ=document.getElementById('f-occ').value||'professional';
+  profile.city=document.getElementById('f-city').value||'India';
+  profile.goals=document.getElementById('goals-inp')?document.getElementById('goals-inp').value:'';
+  go('page-invest');
+}
+
+// ─── ADVISOR PAGE BUILD ───
+function buildAdvisor(){
+  const safe=Math.round(profile.income/80);
+  const safeM=safe*30;
+  document.getElementById('safe-val').textContent='₹'+safe.toLocaleString('en-IN');
+  document.getElementById('safe-desc').textContent=`per day  ·  ₹${safeM.toLocaleString('en-IN')} / month`;
+  document.getElementById('bd-income').textContent='₹'+profile.income.toLocaleString('en-IN');
+  document.getElementById('bd-expense').textContent='₹'+profile.expense.toLocaleString('en-IN');
+  document.getElementById('bd-safe').textContent='₹'+safe.toLocaleString('en-IN')+'/day';
+  // Boot greeting
+  const msgs=document.getElementById('chat-msgs');
+  msgs.innerHTML='';
+  addMsg('bot',`👋 Hi! I'm your InvestHeights AI Advisor.\n\nBased on your profile — monthly income of **₹${profile.income.toLocaleString('en-IN')}** — your safe daily investment amount is **₹${safe.toLocaleString('en-IN')}** (₹${(safe*30).toLocaleString('en-IN')}/month).\n\nAsk me anything about investing, where to start, or how to build your portfolio!`);
+}
+
+// ─── INVESTMENT DATA ───
+const D={
+  fd:{name:'Fixed Deposit',icon:'📅',badge:'Bank · Low Risk',bc:'#00C896',tag:'The cornerstone of safe investing in India — guaranteed returns, zero market risk.',desc:'A Fixed Deposit (FD) is an investment where you deposit a lump sum with a bank or NBFC for a fixed tenure at a predetermined interest rate. Your principal is fully protected and returns are guaranteed regardless of market conditions. In India, FDs are insured up to ₹5 lakh by DICGC.',ret:'6–8% p.a.',risk:'Very Low',hz:'1 month – 10 years',rp:15,rc:'#00C896',pros:['Guaranteed returns — zero market risk','Capital protection up to ₹5 lakh via DICGC','Flexible tenures from 7 days to 10 years','Loan against FD up to 90% of deposit','Senior citizens get 0.25–0.5% extra interest'],cons:['Returns often below inflation rate','Interest taxable as per income slab','Premature withdrawal attracts 0.5–1% penalty','Capital locked — reduces liquidity'],how:['Open savings account with any scheduled bank','Choose "Fixed Deposit" in branch or net banking','Enter deposit amount (min ₹1,000)','Select tenure and interest payout frequency','Note maturity date and reinvest or withdraw']},
+  rd:{name:'Recurring Deposit',icon:'🔄',badge:'Bank · Low Risk',bc:'#00C896',tag:'Build wealth month by month — perfect for salaried individuals starting their savings journey.',desc:'A Recurring Deposit (RD) lets you invest a fixed amount every month for a chosen tenure. Interest is compounded quarterly and you receive the full corpus at maturity. Post Office RDs offer government-backed security at competitive rates.',ret:'5.5–7.5% p.a.',risk:'Very Low',hz:'6 months – 10 years',rp:12,rc:'#00C896',pros:['Start with as little as ₹100 per month','Builds strong financial discipline','Predictable maturity amount','Zero market risk','Post Office RD offers sovereign guarantee'],cons:['Returns lower than equity over long periods','Interest income is taxable','Premature closure attracts penalty','Real returns can be eroded by high inflation'],how:['Visit bank branch or log in to net banking','Select "Recurring Deposit" and choose monthly amount','Set tenure and enable auto-debit','Collect maturity amount — reinvest or redeploy']},
+  mf:{name:'Mutual Funds',icon:'🧺',badge:'Market · Medium Risk',bc:'#F4C430',tag:'Professionally managed, diversified investing — ideal for anyone entering the market.',desc:'Mutual Funds pool money from thousands of investors into a diversified portfolio managed by a SEBI-regulated professional. They offer flexibility through SIPs starting from ₹500/month. ELSS funds additionally provide tax deductions under Section 80C.',ret:'10–18% p.a. (equity funds)',risk:'Medium–High',hz:'3–10+ years',rp:55,rc:'#F4C430',pros:['Professional SEBI-regulated fund management','Instant diversification','Start SIP from ₹500/month','Highly liquid — redeem within 1–3 days','ELSS saves up to ₹46,800 in taxes annually'],cons:['Returns not guaranteed','Fund manager risk','Exit loads for early redemption','2,500+ funds can be overwhelming for beginners'],how:['Complete KYC using PAN and Aadhaar','Open account on Zerodha Coin, Groww, or Kuvera','Choose fund type: Equity, Debt, or Hybrid','Set up monthly SIP — amount and date','Review performance every 6–12 months']},
+  idx:{name:'Index Fund',icon:'📈',badge:'Market · Medium Risk',bc:'#F4C430',tag:'Invest in the entire market automatically — passive wealth creation at minimal cost.',desc:'Index funds passively mirror a market index like Nifty 50 or Sensex. With expense ratios as low as 0.05–0.2%, they consistently outperform 80–90% of active fund managers over 10+ years. Warren Buffett famously recommended index funds for most retail investors.',ret:'11–14% p.a. (Nifty 50 historical)',risk:'Medium',hz:'5–15+ years',rp:50,rc:'#F4C430',pros:['Ultra-low fees — expense ratio below 0.2%','No fund manager bias','Instant diversification across 50–500 companies','Beats 80–90% of active managers over 10+ years','Completely transparent holdings'],cons:['Falls with the market — no downside protection','Returns capped at market returns','Requires long investment horizon','Rebalancing can cause tracking error'],how:['Open Demat + trading account (Zerodha, Upstox)','Search for Nifty 50 index funds','Compare expense ratios — choose the lowest','Invest via lump sum or SIP','Stay invested through market cycles']},
+  stocks:{name:'Stocks',icon:'💹',badge:'Market · High Risk',bc:'#FF4757',tag:'Own a piece of real businesses — the highest long-term wealth creator in history.',desc:'Buying stocks means owning shares in publicly listed companies on BSE or NSE. Indian stock markets have delivered ~14–15% CAGR over 30 years. Individual stocks carry concentration risk — a single company can lose 80–90% of its value. Disciplined research and diversification are essential.',ret:'15–25%+ p.a. (skilled investors)',risk:'High',hz:'5–20+ years',rp:75,rc:'#FF4757',pros:['Highest potential returns of any mainstream asset','Dividend income on top of price gains','Direct ownership in world-class companies','Extremely liquid — buy/sell in seconds','Fractional shares allow ownership of expensive stocks'],cons:['High volatility — 30–50% drawdowns are common','Extensive research required','Single company risk — bankruptcies occur','STCG taxed at 15%; LTCG at 10% above ₹1 lakh'],how:['Open Demat account with Zerodha or Angel One','Complete KYC — PAN, Aadhaar, bank link','Start with large-cap blue-chips: TCS, Infosys, HDFC','Diversify across 15–20 stocks in different sectors','Review and rebalance portfolio quarterly']},
+  etf:{name:'ETF',icon:'🔗',badge:'Market · Medium Risk',bc:'#F4C430',tag:'A hybrid of stocks and mutual funds — trade an entire index like a single share.',desc:'ETFs are baskets of securities that trade on stock exchanges in real time like individual shares. Popular Indian ETFs include Nifty 50 ETF (Nippon Nifty BeES), Gold ETF, and sectoral ETFs. They combine the diversification of mutual funds with the flexibility of stocks.',ret:'10–14% p.a. (equity ETFs)',risk:'Medium',hz:'3–10+ years',rp:45,rc:'#F4C430',pros:['Lowest expense ratios among all fund types','Real-time trading flexibility','Instant diversification','Gold ETFs provide digital gold exposure','Tax-efficient for long-term investors'],cons:['Requires Demat account','Bid-ask spread adds marginal cost','Niche sector ETFs can have low liquidity','Cannot invest exact rupee amounts'],how:['Open Demat + trading account','Search for ETFs on NSE: "Nifty BeES", "Nippon Gold ETF"','Buy units during market hours (9:15 AM – 3:30 PM)','Place limit or market order','Monitor quarterly and rebalance annually']},
+  intraday:{name:'Intraday Trading',icon:'⚡',badge:'Market · Very High Risk',bc:'#FF4757',tag:'Buy and sell within the same trading day — high adrenaline, high stakes.',desc:'Intraday trading involves buying and selling stocks within the same NSE/BSE session (9:15 AM – 3:30 PM IST). SEBI data shows over 90% of retail intraday traders lose money. It demands expert technical knowledge, iron discipline, and full-time attention.',ret:'Highly variable (most traders lose)',risk:'Very High',hz:'Minutes to hours',rp:95,rc:'#FF4757',pros:['No overnight market risk','Quick profit for skilled technical traders','Leverage amplifies gains on correct trades','Can profit in falling markets via short selling'],cons:['90%+ retail traders lose money — SEBI data','Extremely stressful and time-consuming','Brokerage and taxes erode thin margins','Requires years of technical analysis expertise'],how:['Only attempt after 1–2 years of basic investing experience','Learn technical analysis: RSI, MACD, candlestick patterns','Paper trade for 3–6 months without real capital','Set maximum daily loss limit — 1–2% of capital per trade','Use strict stop-loss orders on every trade — no exceptions']},
+  btc:{name:'Bitcoin (BTC)',icon:'₿',badge:'Crypto · Very High Risk',bc:'#FF4757',tag:"Digital gold — the world's first and most valuable decentralised cryptocurrency.",desc:"Bitcoin is a decentralised digital currency operating on blockchain technology with a fixed supply of 21 million coins. Despite extreme volatility of -70 to -80% in bear markets, it has been the best-performing asset of the past decade. Institutional adoption via BlackRock and Fidelity ETFs has increased legitimacy.",ret:'+50–200% bull years; -70% bear years',risk:'Very High',hz:'3–10+ years',rp:90,rc:'#FF4757',pros:['Best-performing asset of the last decade','Decentralised — no government control','Fixed supply creates deflationary store of value','24/7 global liquid market','Growing institutional adoption'],cons:['Extreme volatility — 80% drawdowns are not unusual','30% flat tax + 1% TDS on crypto gains in India','Regulatory uncertainty','No dividend or underlying cash flow','Exchange hacks and wallet loss risk'],how:['Choose a reputable exchange: CoinDCX, WazirX, or Coinbase','Complete full KYC — PAN, Aadhaar, selfie','Start with only an amount you can afford to lose','Consider hardware wallet (Ledger/Trezor) for security','Dollar-cost average (DCA) monthly rather than timing market']},
+  vc:{name:'Venture Capital',icon:'🚀',badge:'Alt · Very High Risk',bc:'#FF4757',tag:'Fund the next Zomato or Flipkart at its earliest stage — extreme risk, extreme reward.',desc:"Venture Capital means investing in early-stage startups for equity. Professional VC firms deploy capital into 10–20 startups knowing most will fail but a few may generate extraordinary returns. Direct VC investing typically requires ₹25 lakh+ minimum. Retail investors can access this via angel networks or VC fund-of-funds.",ret:'20–40% IRR for top-tier funds',risk:'Very High',hz:'7–12 years',rp:88,rc:'#FF4757',pros:['Potential for 50–100x returns','Exposure to cutting-edge startups','Portfolio effect — one unicorn covers all losses','Access to exclusive deal flow','Social impact through funding innovation'],cons:['9 out of 10 startups fail','Capital locked for 7–12 years (illiquid)','Minimum ticket size ₹25 lakh+','Complex legal structures','Returns materialise only at exit events'],how:['Join angel networks: Indian Angel Network, LetsVenture, 100X.VC','Or invest in SEBI-registered Category I AIFs','Conduct thorough due diligence on founders and market','Diversify across 10–15 startups','Expect 7–10 year illiquid horizon with binary outcomes']},
+  re:{name:'Real Estate',icon:'🏠',badge:'Physical · Medium Risk',bc:'#6496FF',tag:'The oldest form of wealth — tangible, income-generating, and universally understood.',desc:"Real estate involves purchasing property for rental income and capital appreciation. Indian Tier-1 cities have returned 8–12% p.a. combined. REITs on NSE democratise commercial real estate with as little as ₹10,000–15,000, providing quarterly dividends from office rental income.",ret:'8–12% p.a. (rental + appreciation)',risk:'Medium',hz:'5–20+ years',rp:45,rc:'#6496FF',pros:['Tangible, physical asset','Dual returns: rental income + capital appreciation','Home loan leverage amplifies return on equity','Tax deductions on home loan interest (Section 24)','Strong inflation hedge'],cons:['Very high minimum capital (₹30 lakh+)','Extremely illiquid — selling takes months','Maintenance costs and tenant issues','Location selection risk destroys returns','Black money complications in Indian real estate'],how:['Research micro-markets: metro access, IT corridors, schools','Budget for 5–7% registration + stamp duty + interiors','Consult RERA-registered agents and verify documents','Check title deed, encumbrance certificate, occupancy cert','For lower capital, invest in Embassy REIT or Mindspace REIT on NSE']},
+  gold:{name:'Gold',icon:'🥇',badge:'Physical · Low-Medium Risk',bc:'#F4C430',tag:"5,000 years of proven store of value — the ultimate portfolio hedge.",desc:"Gold has been humanity's most trusted store of value for millennia. Sovereign Gold Bonds (SGBs) — RBI-issued — provide 2.5% annual interest plus gold price appreciation, with capital gains completely tax-free at 8-year maturity. SGBs represent the most efficient form of gold investment available today.",ret:'8–11% p.a. (long-term INR returns)',risk:'Low–Medium',hz:'3–15+ years',rp:30,rc:'#F4C430',pros:['Premier safe haven during market crashes','Hedge against rupee depreciation and inflation','SGBs provide 2.5% annual interest + gold gains','SGB capital gains tax-free at 8-year maturity','High cultural demand in India supports price floor'],cons:['No periodic income from physical gold','Storage, locker, and insurance costs','Making charges on jewellery (15–25%) dilute returns','Price driven by global factors — US rates and dollar'],how:['Best: Sovereign Gold Bonds (SGB) — apply via bank or Zerodha during RBI issue windows','Second: Gold ETF via Demat — no storage, tracks live gold price','Third: Digital Gold via Paytm/PhonePe/Google Pay','Avoid physical jewellery for pure investment purposes','Maintain 10–15% gold allocation as strategic hedge']},
+  silver:{name:'Silver',icon:'🥈',badge:'Physical · Medium Risk',bc:'#6496FF',tag:'The underrated precious metal — industrial demand meets investment appeal.',desc:"Silver serves dual roles as precious metal and critical industrial commodity used in solar panels, EVs, and electronics. Silver prices are more volatile than gold and historically outperform gold during precious metal bull cycles. Silver ETFs are now available on NSE.",ret:'10–20% in bull cycles (volatile)',risk:'Medium–High',hz:'3–10 years',rp:60,rc:'#6496FF',pros:['Lower price accessible to all investor sizes','Industrial demand from solar and EVs provides support','Historically outperforms gold in precious metal bull markets','Silver ETFs available on NSE for digital exposure','Effective portfolio diversifier alongside gold'],cons:['Higher volatility than gold','Large storage requirements for physical silver','No Sovereign Silver Bond scheme (unlike gold)','Industrial slowdown can disproportionately hurt silver'],how:['Purchase Silver ETF via Demat: Mirae Asset or ICICI Pru Silver ETF','Or buy 999-purity silver coins from certified dealers (MMTC-PAMP)','Avoid silver jewellery — making charges reduce returns','Monitor gold-silver ratio: when above 80, silver tends to outperform','Cap silver at 5% of total investment portfolio']},
+  luxury:{name:'Luxury Assets',icon:'💎',badge:'Alt · Variable Risk',bc:'#6496FF',tag:'Watches, art, wine, vintage cars — where passion meets portfolio.',desc:"Luxury assets encompass rare Swiss watches (Rolex, Patek Philippe), fine art, vintage wine, classic cars, and rare collectibles. A Patek Philippe Reference 5711 doubled in value over 5 years. These are passion-driven, illiquid investments requiring deep domain expertise.",ret:'10–30%+ for rare/appreciating items',risk:'High (expertise required)',hz:'5–20+ years',rp:70,rc:'#6496FF',pros:['Enjoyment while it appreciates ("passion investing")','Top categories uncorrelated to stock market cycles','Extraordinary returns possible with rare pieces','Exclusivity and scarcity drive demand','Tangible, ownable assets with aesthetic pleasure'],cons:['Deep expertise is non-negotiable — naive buyers overpay','Extremely illiquid — finding a buyer takes months','Authentication and forgery risk','Zero income while holding the asset','Insurance, storage, and maintenance costs'],how:['Only invest in categories you genuinely understand and love','Authenticate every purchase via certified experts','Start with established categories: Swiss watches, fine art','Use reputable auction houses: Sotheby\'s, Christie\'s, WatchBox','Cap luxury assets at 3–5% of total investment portfolio']}
+};
+
+const CATS={
+  a:{title:'🏦 A. Bank Related Investment',color:'#00C896',items:[{k:'fd',icon:'📅',label:'Fixed Deposits'},{k:'rd',icon:'🔄',label:'Recurring Deposits'}]},
+  b:{title:'📊 B. Share Market Investment',color:'#F4C430',items:[{k:'mf',icon:'🧺',label:'Mutual Funds'},{k:'idx',icon:'📈',label:'Index Fund'},{k:'stocks',icon:'💹',label:'Stocks'},{k:'etf',icon:'🔗',label:'ETF'},{k:'intraday',icon:'⚡',label:'Intraday Trading'}]},
+  c:{title:'₿ C. Crypto Currency',color:'#FF4757',items:[{k:'btc',icon:'₿',label:'Bitcoin'},{k:'vc',icon:'🚀',label:'Venture Capital'}]},
+  d:{title:'🏠 D. Physical Investment',color:'#6496FF',items:[{k:'re',icon:'🏠',label:'Real Estate'},{k:'gold',icon:'🥇',label:'Gold'},{k:'silver',icon:'🥈',label:'Silver'},{k:'luxury',icon:'💎',label:'Luxury Assets'}]}
+};
+
+function openCat(k){
+  const c=CATS[k];
+  document.getElementById('cat-title').textContent=c.title;
+  document.getElementById('cat-title').style.color=c.color;
+  document.getElementById('cat-list').innerHTML=c.items.map((it,i)=>`
+    <li onclick="openDetail('${it.k}')">
+      <span style="font-size:1.25rem">${it.icon}</span>
+      <span class="num">${i+1}.</span>
+      <span>${it.label}</span>
+      <span style="margin-left:auto;color:var(--muted);font-size:.8rem">Details →</span>
+    </li>`).join('');
+  document.getElementById('cat-overlay').classList.add('open');
+}
+function closeCat(){document.getElementById('cat-overlay').classList.remove('open');}
+
+// ─── DETAIL MODAL WITH MINI CHATBOT ───
+let miniHistory={};
+function openDetail(key){
+  const d=D[key];
+  if(!miniHistory[key])miniHistory[key]=[];
+  document.getElementById('detail-box').innerHTML=`
+    <button class="d-close" onclick="closeDetail()">✕</button>
+    <div class="d-badge" style="background:${d.bc}22;color:${d.bc};border:1px solid ${d.bc}44">${d.badge}</div>
+    <div class="d-name">${d.icon} ${d.name}</div>
+    <div class="d-tagline">${d.tag}</div>
+    <div class="d-grid">
+      <div class="d-stat"><div class="d-stat-label">Expected Returns</div><div class="d-stat-val" style="color:${d.bc}">${d.ret}</div></div>
+      <div class="d-stat"><div class="d-stat-label">Risk Level</div><div class="d-stat-val" style="color:${d.bc}">${d.risk}</div></div>
+      <div class="d-stat"><div class="d-stat-label">Time Horizon</div><div class="d-stat-val" style="font-size:.85rem">${d.hz}</div></div>
+    </div>
+    <div class="d-section">
+      <div class="d-section-title">Risk Meter</div>
+      <div style="display:flex;align-items:center;gap:.8rem;margin-top:.4rem">
+        <span style="font-size:.75rem;color:var(--green)">Low</span>
+        <div class="risk-bar-wrap" style="flex:1"><div class="risk-bar" style="background:${d.rc}" data-pct="${d.rp}"></div></div>
+        <span style="font-size:.75rem;color:var(--red)">High</span>
+      </div>
+    </div>
+    <div class="d-section">
+      <div class="d-section-title">What is it?</div>
+      <div class="d-desc">${d.desc}</div>
+    </div>
+    <div class="pros-cons">
+      <div class="pros"><div class="pc-title">✅ Pros</div><ul class="pc-list">${d.pros.map(p=>`<li>${p}</li>`).join('')}</ul></div>
+      <div class="cons"><div class="pc-title">❌ Cons</div><ul class="pc-list">${d.cons.map(c=>`<li>${c}</li>`).join('')}</ul></div>
+    </div>
+    <div class="d-section">
+      <div class="d-section-title">How to Get Started</div>
+      <ol class="how-steps">${d.how.map(s=>`<li>${s}</li>`).join('')}</ol>
+    </div>
+    <!-- MINI CHATBOT -->
+    <div class="mini-chat-section">
+      <div class="mini-chat-label">🤖 Ask AI about ${d.name}</div>
+      <div class="mini-msgs" id="mini-msgs-${key}"></div>
+      <div class="mini-chip-row">
+        <span class="chip" style="font-size:.76rem" onclick="miniChip('${key}','Is ${d.name} right for me?')">Right for me?</span>
+        <span class="chip" style="font-size:.76rem" onclick="miniChip('${key}','How much should I invest in ${d.name}?')">How much to invest?</span>
+        <span class="chip" style="font-size:.76rem" onclick="miniChip('${key}','What are the tax rules for ${d.name}?')">Tax rules?</span>
+        <span class="chip" style="font-size:.76rem" onclick="miniChip('${key}','Compare ${d.name} with other investments')">Compare</span>
+      </div>
+      <div class="mini-input-row">
+        <input class="mini-input" id="mini-inp-${key}" placeholder="Ask anything about ${d.name}..." onkeydown="if(event.key==='Enter')miniSend('${key}')">
+        <button class="mini-send" id="mini-send-${key}" onclick="miniSend('${key}')">➤</button>
+      </div>
+    </div>`;
+  document.getElementById('detail-overlay').classList.add('open');
+  setTimeout(()=>{const b=document.querySelector('.risk-bar');if(b)b.style.width=b.dataset.pct+'%';},300);
+  // Restore chat history
+  const mm=document.getElementById(`mini-msgs-${key}`);
+  if(miniHistory[key].length===0){
+    addMiniMsg(key,'bot',`Hi! I'm here to answer your questions about **${d.name}**. Ask me anything — risks, returns, how to start, tax implications, or how it fits your profile!`);
+  } else {
+    miniHistory[key].forEach(m=>renderMiniMsg(key,m.role,m.text));
+  }
+}
+function closeDetail(){document.getElementById('detail-overlay').classList.remove('open');}
+
+// ─── MINI CHAT ───
+function renderMiniMsg(key,role,text){
+  const mm=document.getElementById(`mini-msgs-${key}`);
+  if(!mm)return;
+  const div=document.createElement('div');
+  div.className='msg '+(role==='bot'?'bot':'user');
+  div.innerHTML=`<div class="msg-avatar">${role==='bot'?'🤖':'👤'}</div><div class="msg-bubble">${text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')}</div>`;
+  mm.appendChild(div);mm.scrollTop=mm.scrollHeight;
+}
+function addMiniMsg(key,role,text){
+  miniHistory[key].push({role,text});
+  renderMiniMsg(key,role,text);
+}
+function miniChip(key,q){document.getElementById(`mini-inp-${key}`).value=q;miniSend(key);}
+async function miniSend(key){
+  const inp=document.getElementById(`mini-inp-${key}`);
+  const btn=document.getElementById(`mini-send-${key}`);
+  const q=inp.value.trim();if(!q)return;
+  inp.value='';btn.disabled=true;
+  addMiniMsg(key,'user',q);
+  // Typing indicator
+  const mm=document.getElementById(`mini-msgs-${key}`);
+  const typDiv=document.createElement('div');typDiv.className='msg bot';typDiv.id='mini-typing-'+key;
+  typDiv.innerHTML=`<div class="msg-avatar">🤖</div><div class="msg-bubble typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
+  mm.appendChild(typDiv);mm.scrollTop=mm.scrollHeight;
+  const d=D[key];
+  const sysPrompt=`You are InvestHeights AI, an expert Indian financial advisor specialising in ${d.name}. The user's profile: age ${profile.age}, occupation ${profile.occ||'professional'}, city ${profile.city||'India'}, monthly income ₹${profile.income}, monthly expenses ₹${profile.expense}, monthly savings ₹${profile.savings}, goals: "${profile.goals||'wealth creation'}". Their safe daily investment amount is ₹${Math.round(profile.income/80)}. Answer specifically about ${d.name} with Indian context (NSE/BSE, SEBI, RBI regulations, INR amounts, Indian tax rules). Be concise, practical, and personalised. Use bold for key points. 2–4 sentences maximum.`;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:sysPrompt,messages:[...miniHistory[key].slice(0,-1).map(m=>({role:m.role==='bot'?'assistant':'user',content:m.text})),{role:'user',content:q}]})});
+    const data=await res.json();
+    document.getElementById('mini-typing-'+key)?.remove();
+    const reply=data.content?.[0]?.text||'Sorry, I could not fetch a response. Please try again.';
+    addMiniMsg(key,'bot',reply);
+  }catch(e){document.getElementById('mini-typing-'+key)?.remove();addMiniMsg(key,'bot','Connection issue. Please check your network and try again.');}
+  btn.disabled=false;
+}
+
+// ─── MAIN CHATBOT ───
+let chatHistory=[];
+function addMsg(role,text){
+  chatHistory.push({role,text});
+  const msgs=document.getElementById('chat-msgs');
+  const div=document.createElement('div');
+  div.className='msg '+(role==='bot'?'bot':'user');
+  div.innerHTML=`<div class="msg-avatar">${role==='bot'?'🤖':'👤'}</div><div class="msg-bubble">${text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')}</div>`;
+  msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight;
+}
+function chipSend(el){document.getElementById('chat-input').value=el.textContent;sendChat();}
+async function sendChat(){
+  const inp=document.getElementById('chat-input');
+  const btn=document.getElementById('send-btn');
+  const q=inp.value.trim();if(!q)return;
+  inp.value='';btn.disabled=true;
+  addMsg('user',q);
+  const msgs=document.getElementById('chat-msgs');
+  const typDiv=document.createElement('div');typDiv.className='msg bot';typDiv.id='main-typing';
+  typDiv.innerHTML=`<div class="msg-avatar">🤖</div><div class="msg-bubble typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
+  msgs.appendChild(typDiv);msgs.scrollTop=msgs.scrollHeight;
+  const safe=Math.round(profile.income/80);
+  const sysPrompt=`You are InvestHeights AI, an expert Indian financial advisor and wealth coach. User profile: age ${profile.age}, occupation ${profile.occ||'professional'}, city ${profile.city||'India'}, monthly income ₹${profile.income}, expenses ₹${profile.expense}, savings ₹${profile.savings}, goals: "${profile.goals||'wealth creation'}". Safe daily investment: ₹${safe} (₹${safe*30}/month). Provide personalised, practical, concise advice with Indian context (NSE, BSE, SEBI, RBI, INR, Indian tax laws). Use bold for key terms. Keep responses to 3–5 sentences. Be encouraging but realistic.`;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:sysPrompt,messages:[...chatHistory.slice(1,-1).map(m=>({role:m.role==='bot'?'assistant':'user',content:m.text})),{role:'user',content:q}]})});
+    const data=await res.json();
+    document.getElementById('main-typing')?.remove();
+    const reply=data.content?.[0]?.text||'Sorry, I could not fetch a response. Please try again.';
+    addMsg('bot',reply);
+  }catch(e){document.getElementById('main-typing')?.remove();addMsg('bot','Connection issue. Please check your network and try again.');}
+  btn.disabled=false;
+}
+
+document.getElementById('cat-overlay').addEventListener('click',function(e){if(e.target===this)closeCat();});
+document.getElementById('detail-overlay').addEventListener('click',function(e){if(e.target===this)closeDetail();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDetail();closeCat();}});
+</script>
+</body>
+</html>
